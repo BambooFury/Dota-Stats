@@ -100,8 +100,8 @@ var millennium_main = (function (exports) {
                             position: relative;
                         }
                         .dotastats-rank-icon {
-                            width: 52px;
-                            height: 52px;
+                            width: 56px;
+                            height: 56px;
                             object-fit: contain;
                         }
                         .dotastats-top-rank {
@@ -398,6 +398,17 @@ var millennium_main = (function (exports) {
                             const baseName = baseNames[major] || "Без ранга";
                             const rankText = major >= 8 ? baseName : `${baseName} ${minor}`;
                             rankLabelEl.textContent = rankText;
+                        }
+                    } else {
+                        // Нет ранга: используем отдельную иконку-заглушку и подпись
+                        if (rankIconEl) {
+                            rankIconEl.src = "https://steamloopback.host/DotaRanks/rank_icon_unranked.png";
+                        }
+                        if (rankLabelEl) {
+                            rankLabelEl.textContent = "Нет ранга";
+                        }
+                        if (topRankEl) {
+                            topRankEl.style.display = "none";
                         }
                     }
 
