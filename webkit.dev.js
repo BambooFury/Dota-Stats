@@ -410,6 +410,10 @@ var millennium_main = (function (exports) {
                         if (topRankEl) {
                             topRankEl.style.display = "none";
                         }
+                        if (rankCircleEl) {
+                            rankCircleEl.style.boxShadow =
+                                "0 0 0 2px rgba(0, 0, 0, 0.65), 0 0 14px rgba(255, 255, 255, 0.95)";
+                        }
                     }
 
                     if (mmrEl) mmrEl.textContent = mmr != null ? String(mmr) : "";
