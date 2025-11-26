@@ -2,11 +2,11 @@
 
 # Dota 2 OpenDota Stats for Millennium
 
-Компактный виджет со статистикой Dota 2 прямо на странице Steam‑профиля.
+Compact Dota 2 statistics widget directly on your Steam profile page.
 
 <br/>
 
-<!-- Здесь можно прикрепить скриншот карточки плагина -->
+<!-- You can attach a screenshot of the plugin card here -->
 <img src="example.png" alt="Dota 2 OpenDota Stats preview" width="640" />
 
 </div>
@@ -15,32 +15,32 @@
 
 ## ⚡ About
 
-Плагин для [Steam Millennium](https://github.com/SteamClientHomebrew/Millennium), который интегрирует виджет Dota 2 прямо в профиль Steam.
+Plugin for [Steam Millennium](https://github.com/SteamClientHomebrew/Millennium) that integrates a Dota 2 stats widget directly into your Steam profile.
 
-**Что делает плагин:**
+**What this plugin does:**
 
-- **Ранг и медаль** Dota 2 с локальными иконками (Steam `steamui/DotaRanks`).
-- **Русская подпись ранга**: Рекрут, Страж, Рыцарь, Герой, Легенда, Властелин, Божество, Титан.
+- **Dota 2 rank and medal** using local Steam icons (`steamui/DotaRanks`).
+- **Rank label in Russian**: Recruit, Guardian, Crusader, Hero, Legend, Ancient, Divine, Immortal.
 - **MMR**:
-  - использует `mmr_estimate`/`solo_competitive_rank`, если доступны в OpenDota;
-  - если нет — считает **примерный MMR по рангу и количеству звёзд**.
-- Статистика в одной строке: `Matches / MMR / WR`.
-- Если статы в OpenDota скрыты — показывает `Matches: скрыто`, `WR: скрыто`.
-- Кнопка для быстрого перехода на **OpenDota**.
-- Иконка‑ярлык на **Dotabuff** в правом верхнем углу карточки.
+  - uses `mmr_estimate` / `solo_competitive_rank` when available from OpenDota;
+  - otherwise calculates an **approximate MMR from rank and stars**.
+- Compact stats line: `Matches / MMR / WR`.
+- If OpenDota stats are hidden, it shows `Matches: hidden`, `WR: hidden`.
+- Button to quickly open your profile on **OpenDota**.
+- Shortcut icon to **Dotabuff** in the top‑right corner of the card.
 
-> Данные берутся из OpenDota и **могут отличаться от клиента Dota 2**.
+> All data is fetched from OpenDota and **may differ from what you see in the Dota 2 client**.
 
 ---
 
 ## 📥 Installation
 
-> Рекомендуется ставить только из доверенных источников. Проверяйте код перед установкой.
+> It is recommended to install plugins only from trusted sources. Always review the code before installing.
 
-1. Скачайте последнюю сборку плагина (`dotastats-x.y.z.zip`).
-2. Распакуйте содержимое архива в папку плагинов Steam:
-   - по умолчанию на Windows: `C:\Program Files (x86)\Steam\plugins\dotastats`.
-3. Убедитесь, что структура выглядит примерно так:
+1. Download the latest plugin build (`dotastats-x.y.z.zip`).
+2. Extract the archive contents into your Steam plugins folder:
+   - default on Windows: `C:\Program Files (x86)\Steam\plugins\dotastats`.
+3. Make sure the structure looks roughly like this:
 
    ```text
    Steam/
@@ -53,47 +53,47 @@
           └─ ...
    ```
 
-4. Перезапустите Steam с установленным Millennium.
-5. Откройте настройки Millennium и включите плагин **Dota 2 OpenDota Stats**.
+4. Restart Steam with Millennium installed.
+5. Open the Millennium settings and enable the **Dota 2 OpenDota Stats** plugin.
 
 ---
 
 ## 🛠 Building
 
-Клонирование репозитория:
+Clone the repository:
 
 ```bash
 git clone https://github.com/BambooFury/dotastats.git
 cd dotastats
 ```
 
-Установка зависимостей и сборка фронтенда:
+Install dependencies and build the frontend:
 
 ```bash
 npm install
 npm run build
 ```
 
-Команда `npm run build` минифицирует `webkit.dev.js` в `.millennium/Dist/webkit.js` с помощью [terser](https://github.com/terser/terser).
+The `npm run build` command minifies `webkit.dev.js` into `.millennium/Dist/webkit.js` using [terser](https://github.com/terser/terser).
 
-После сборки переместите папку `dotastats` в каталог плагинов Steam (см. раздел Installation).
+After building, move the `dotastats` folder into your Steam plugins directory (see the Installation section).
 
 ---
 
 ## 📎 Notes
 
-- Плагин использует **WebKit** Millennium, чтобы внедрять JavaScript непосредственно в браузер Steam.
-- Не устанавливайте плагины из недоверенных источников — они имеют доступ к содержимому страниц Steam.
-- При большом количестве профилей с закрытой статистикой возможны расхождения между данными Dota 2, OpenDota и Dotabuff.
+- The plugin uses Millennium **WebKit** to inject JavaScript directly into the Steam browser.
+- Do not install plugins from untrusted sources — they have access to the contents of your Steam pages.
+- With many profiles having private or incomplete stats, discrepancies between Dota 2, OpenDota and Dotabuff data are possible.
 
-**Пути Millennium по умолчанию:**
+**Default Millennium paths:**
 
-- **Windows:** `C:\Program Files (x86)\Steam`  → плагины в `Steam/plugins`.
-- **Unix:** `~/.millennium` (если вы используете Millennium там).
+- **Windows:** `C:\Program Files (x86)\Steam`  → plugins in `Steam/plugins`.
+- **Unix:** `~/.millennium` (if you are using Millennium there).
 
 ---
 
 ## 📜 License
 
-Проект распространяется по лицензии **MIT**. Подробности см. в файле [LICENSE](LICENSE).
+This project is licensed under the **MIT** license. See [LICENSE](LICENSE) for details.
 
