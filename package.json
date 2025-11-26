@@ -1,0 +1,12 @@
+{
+  "name": "dotastats",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Millennium plugin: Dota 2 stats card using OpenDota.",
+  "scripts": {
+    "build": "terser webkit.dev.js -c -m -o .millennium/Dist/webkit.js"
+  },
+  "devDependencies": {
+    "terser": "^5.36.0"
+  }
+}
