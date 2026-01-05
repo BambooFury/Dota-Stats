@@ -4,7 +4,7 @@
   "private": true,
   "description": "Millennium plugin: Dota 2 stats card using OpenDota.",
   "scripts": {
-    "build": "terser webkit.dev.js -c -m -o .millennium/Dist/webkit.js"
+    "build": "powershell -NoProfile -Command \"New-Item -ItemType Directory -Force -Path 'webkit/dist' | Out-Null; Copy-Item -Force '.millennium/Dist/webkit.js' 'webkit/dist/webkit.js'\""
   },
   "devDependencies": {
     "terser": "^5.36.0"
