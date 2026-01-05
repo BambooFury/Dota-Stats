@@ -9,10 +9,6 @@ Compact Dota 2 statistics widget directly on your Steam profile page.
 <!-- You can attach a screenshot of the plugin card here -->
 <img src="example.png" alt="Dota 2 OpenDota Stats preview" width="640" />
 
-<br/>
-
-<img src="preview.png" alt="Dota 2 OpenDota Stats preview 2" width="640" />
-
 </div>
 
 ---
