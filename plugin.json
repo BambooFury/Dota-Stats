@@ -3,6 +3,6 @@
   "name": "dotastats",
   "common_name": "Dota 2 Stats",
   "description": "Displays Dota 2 stats widget on Steam profile using OpenDota (stub).",
-  "include": ["static"],
+  "include": ["backend", "static", "webkit", "LICENSE", "README.md"],
   "backendType": "lua"
 }
