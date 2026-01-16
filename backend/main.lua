@@ -51,12 +51,18 @@ local function copy_rank_icons()
     end
 
     for _, entry in ipairs(entries) do
-        if entry.is_file and fs.extension(entry.path) == ".png" then
-            local src = fs.join(ranks_dir, entry.name)
-            local dst = fs.join(dest_dir, entry.name)
-            local ok, err = fs.copy(src, dst)
-            if not ok then
-                logger:error("[dotastats] failed to copy " .. entry.name .. ": " .. tostring(err))
+        -- entry might be just a string (filename) or a table with fields
+        local filename = type(entry) == "string" and entry or entry.name or entry.path
+        if filename and fs.extension(filename) == ".png" then
+            local src = fs.join(ranks_dir, filename)
+            local dst = fs.join(dest_dir, filename)
+            
+            -- Only copy if source is actually a file
+            if fs.is_file(src) then
+                local ok, err = fs.copy(src, dst)
+                if not ok then
+                    logger:error("[dotastats] failed to copy " .. filename .. ": " .. tostring(err))
+                end
             end
         end
     end
