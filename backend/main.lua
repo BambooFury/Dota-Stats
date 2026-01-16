@@ -1,91 +1,67 @@
 local logger = require("logger")
 local millennium = require("millennium")
+local fs = require("fs")
 
 local function trim(s)
     return (tostring(s):gsub("^%s+", ""):gsub("%s+$", ""))
 end
 
-local function normalize_path(p)
-    -- debug.getinfo() returns Windows paths with single backslashes
-    -- so we normalize both single and double backslashes to forward slashes
-    p = p:gsub("\\\\", "/")
-    p = p:gsub("\\", "/")
-    return p
-end
-
-local function dirname(p)
-    p = normalize_path(p)
-    return (p:match("^(.*)/[^/]*$") or ".")
-end
-
-local function join_path(a, b)
-    a = normalize_path(a)
-    b = normalize_path(b)
-    if a:sub(-1) == "/" then
-        return a .. b
-    end
-    return a .. "/" .. b
-end
-
 local function get_plugin_dir()
     local src = debug.getinfo(1, "S").source or ""
     src = src:gsub("^@", "")
-    local backend_dir = dirname(src)
-    return dirname(backend_dir)
-end
-
-local function is_windows()
-    return package.config:sub(1, 1) == "\\"
-end
-
-local function ensure_dir(path)
-    if is_windows() then
-        os.execute('mkdir "' .. path .. '" 2>nul')
-    else
-        os.execute('mkdir -p "' .. path .. '"')
-    end
-end
-
-local function file_exists(path)
-    local f = io.open(path, "rb")
-    if f then
-        f:close()
-        return true
-    end
-    return false
+    return fs.parent_path(fs.parent_path(src))
 end
 
 local function copy_rank_icons()
     local plugin_dir = get_plugin_dir()
-
-    local ranks_dir = join_path(plugin_dir, "backend/static/ranks")
+    local ranks_dir = fs.join(plugin_dir, "backend", "static", "ranks")
     local steam_path = millennium.steam_path()
-    local dest_dir = join_path(steam_path, "steamui/DotaRanks")
+    local dest_dir = fs.join(steam_path, "steamui", "DotaRanks")
 
     logger:info("[dotastats] plugin_dir: " .. plugin_dir)
     logger:info("[dotastats] ranks_dir: " .. ranks_dir)
     logger:info("[dotastats] dest_dir: " .. dest_dir)
 
-    ensure_dir(dest_dir)
+    -- Create destination directory if it doesn't exist
+    if not fs.exists(dest_dir) then
+        local ok, err = fs.create_directories(dest_dir)
+        if not ok then
+            logger:error("[dotastats] failed to create dest_dir: " .. tostring(err))
+            return
+        end
+    end
 
-    -- Don't copy on every startup: it causes console windows to flash.
-    -- If at least one expected file exists, assume icons are already installed.
-    local sentinel = join_path(dest_dir, "rank_icon_1_1.png")
-    if file_exists(sentinel) then
+    -- Check if icons are already copied
+    local sentinel = fs.join(dest_dir, "rank_icon_1_1.png")
+    if fs.exists(sentinel) then
         logger:info("[dotastats] rank icons already present, skipping copy")
         return
     end
 
-    -- IMPORTANT: do a single copy command to avoid spawning many console windows
-    if is_windows() then
-        -- /D copies only newer files, /Y suppresses prompts, /I assumes destination is a directory
-        local cmd = 'cmd /c xcopy /D /Y /I "' .. ranks_dir .. '\\*.png" "' .. dest_dir .. '\\" >nul 2>nul'
-        os.execute(cmd)
-        logger:info("[dotastats] copied rank icons via xcopy")
-    else
-        os.execute('cp -f "' .. ranks_dir .. '"/*.png "' .. dest_dir .. '" 2>/dev/null')
-        logger:info("[dotastats] copied rank icons via cp")
+    -- Copy all PNG files from ranks directory
+    if not fs.exists(ranks_dir) then
+        logger:error("[dotastats] ranks_dir does not exist: " .. ranks_dir)
+        return
     end
+
+    local entries = fs.list(ranks_dir)
+    if not entries then
+        logger:error("[dotastats] failed to list ranks_dir")
+        return
+    end
+
+    for _, entry in ipairs(entries) do
+        if entry.is_file and fs.extension(entry.path) == ".png" then
+            local src = fs.join(ranks_dir, entry.name)
+            local dst = fs.join(dest_dir, entry.name)
+            local ok, err = fs.copy(src, dst)
+            if not ok then
+                logger:error("[dotastats] failed to copy " .. entry.name .. ": " .. tostring(err))
+            end
+        end
+    end
+
+    logger:info("[dotastats] copied rank icons using fs module")
 end
 
 local function on_load()
@@ -103,17 +79,25 @@ local function on_unload()
 end
 
 local function read_stratz_token()
-    local token_path = join_path(get_plugin_dir(), "backend/stratz_token.txt")
-    local f = io.open(token_path, "rb")
-    if not f then
+    local token_path = fs.join(get_plugin_dir(), "backend", "stratz_token.txt")
+    
+    if not fs.exists(token_path) then
         return nil, "stratz_token.txt not found"
     end
+    
+    local f = io.open(token_path, "rb")
+    if not f then
+        return nil, "failed to open stratz_token.txt"
+    end
+    
     local token = f:read("*a") or ""
     f:close()
     token = trim(token)
+    
     if token == "" then
         return nil, "stratz_token.txt is empty"
     end
+    
     return token, nil
 end
 
@@ -140,7 +124,9 @@ local function stratz_graphql(steam_account_id)
         tostring(steam_account_id)
     )
 
-    if not is_windows() then
+    -- Check if we're on Windows (PowerShell approach)
+    local is_windows = package.config:sub(1, 1) == "\\"
+    if not is_windows then
         return nil, "STRATZ backend is currently Windows-only"
     end
 
