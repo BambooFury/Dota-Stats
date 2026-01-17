@@ -177,7 +177,24 @@ end
 
 -- Generic logging endpoint for frontend diagnostics
 function BackendLog(message)
-    logger:info("[dotastats] frontend: " .. tostring(message))
+    local msg = tostring(message)
+    logger:info("[dotastats] frontend: " .. msg)
+    
+    -- Check if this is a URL opening request
+    if msg:match("^Opening OpenDota:") or msg:match("^Opening Dotabuff:") then
+        local url = msg:match("https://[%w%.%-_/]+")
+        if url then
+            logger:info("[dotastats] Attempting to open URL: " .. url)
+            -- Try to open URL using system command
+            local is_windows = package.config:sub(1, 1) == "\\"
+            if is_windows then
+                os.execute('start "" "' .. url .. '"')
+            else
+                os.execute('xdg-open "' .. url .. '"')
+            end
+        end
+    end
+    
     return "ok"
 end
 
