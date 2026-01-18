@@ -21,7 +21,7 @@ Thumbs.db
 
 # Build artifacts
 *.zip
-dist/
+/dist/
 build/
 .cache/
 .millennium/
