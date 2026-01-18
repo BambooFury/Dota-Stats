@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/SteamClientHomebrew/Millennium/main/src/sys/plugin-schema.json",
   "name": "dotastats",
   "common_name": "Dota 2 Stats",
-  "description": "Displays Dota 2 stats widget on Steam profile using OpenDota (stub).",
+  "description": "Displays Dota 2 player statistics on Steam profiles using OpenDota API.",
   "include": ["backend", "static", "webkit", "LICENSE", "README.md"],
   "backendType": "lua"
 }
