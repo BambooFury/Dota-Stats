@@ -24,6 +24,7 @@ Thumbs.db
 dist/
 build/
 .cache/
+.millennium/
 
 # Allow committed webkit build output (PluginDatabase expects webkit/)
 !webkit/
