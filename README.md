@@ -47,8 +47,8 @@ Plugin for [Steam Millennium](https://github.com/SteamClientHomebrew/Millennium)
     └─ plugins/
        └─ dotastats/
           ├─ backend/
-          ├─ static/
-          ├─ .millennium/Dist/webkit.js
+          ├─ frontend/
+          ├─ webkit/
           ├─ plugin.json
           └─ ...
    ```

@@ -14,7 +14,7 @@ end
 
 local function copy_rank_icons()
     local plugin_dir = get_plugin_dir()
-    local ranks_dir = fs.join(plugin_dir, "backend", "static", "ranks")
+    local ranks_dir = fs.join(plugin_dir, "frontend", "ranks")
     local steam_path = millennium.steam_path()
     local dest_dir = fs.join(steam_path, "steamui", "DotaRanks")
 
