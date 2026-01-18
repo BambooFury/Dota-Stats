@@ -4,6 +4,6 @@
   "common_name": "Dota 2 Stats",
   "description": "Displays Dota 2 player statistics on Steam profiles using OpenDota API.",
   "version": "1.0.0",
-  "useBackend": true,
-  "include": ["backend", "frontend", "webkit", "LICENSE", "README.md"]
+  "backendType": "lua",
+  "include": ["backend", "static", "webkit", "LICENSE", "README.md"]
 }
