@@ -26,8 +26,8 @@ build/
 .cache/
 
 # Allow committed webkit build output (PluginDatabase expects webkit/)
-!webkit/dist/
-!webkit/dist/**
+!webkit/
+!webkit/**
 
 # Millennium / local-only stuff
 steamui/

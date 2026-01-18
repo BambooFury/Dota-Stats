@@ -74,7 +74,7 @@ npm install
 npm run build
 ```
 
-The `npm run build` command minifies `webkit.dev.js` into `.millennium/Dist/webkit.js` using [terser](https://github.com/terser/terser).
+The `npm run build` command copies the compiled webkit bundle from `.millennium/Dist/webkit.js` to `webkit/webkit.js`.
 
 After building, move the `dotastats` folder into your Steam plugins directory (see the Installation section).
 
