@@ -16,7 +16,7 @@ local function copy_rank_icons()
     -- Wrap everything in pcall to prevent crashes
     local success, err = pcall(function()
         local plugin_dir = get_plugin_dir()
-        local ranks_dir = fs.join(plugin_dir, "static", "ranks")
+        local ranks_dir = fs.join(plugin_dir, "frontend", "ranks")
         local steam_path = millennium.steam_path()
         local dest_dir = fs.join(steam_path, "steamui", "DotaRanks")
 
@@ -83,9 +83,7 @@ end
 local function on_load()
     local success, err = pcall(function()
         logger:info("[dotastats] loading, Millennium " .. millennium.version())
-        -- Temporarily disable icon copying to test
-        -- copy_rank_icons()
-        logger:info("[dotastats] skipping icon copy for testing")
+        copy_rank_icons()
         millennium.ready()
     end)
     
