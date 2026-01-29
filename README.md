@@ -1,99 +1,152 @@
 <div align="center">
 
-# Dota 2 OpenDota Stats for Millennium
+# Dota 2 Stats for Millennium
 
-Compact Dota 2 statistics widget directly on your Steam profile page.
+A [Millennium](https://steambrew.app/) plugin that displays Dota 2 player statistics directly on Steam profile pages.
 
 <br/>
 
-<!-- You can attach a screenshot of the plugin card here -->
-<img src="examplee.png" alt="Dota 2 OpenDota Stats preview" width="640" />
+<img src="examplee.png" alt="Dota 2 Stats Preview" width="600" />
 
 </div>
 
 ---
 
-## ⚡ About
+## Features
 
-Plugin for [Steam Millennium](https://github.com/SteamClientHomebrew/Millennium) that integrates a Dota 2 stats widget directly into your Steam profile.
+- **Rank Medal Display** — Shows your current Dota 2 rank with official medal icons
+- **MMR Estimation** — Displays MMR from OpenDota or calculates approximate value from rank
+- **Match Statistics** — Total matches played and win rate percentage
+- **Leaderboard Position** — Shows top rank position for Immortal players
+- **Quick Links** — One-click access to your OpenDota and Dotabuff profiles
+- **Works Everywhere** — Compatible with Steam Desktop and Overlay browser
 
-**What this plugin does:**
+## Requirements
 
-- **Dota 2 rank and medal** using local Steam icons (`steamui/DotaRanks`).
-- **Rank label in Russian**: Recruit, Guardian, Crusader, Hero, Legend, Ancient, Divine, Immortal.
-- **MMR**:
-  - uses `mmr_estimate` / `solo_competitive_rank` when available from OpenDota;
-  - otherwise calculates an **approximate MMR from rank and stars**.
-- Compact stats line: `Matches / MMR / WR`.
-- If OpenDota stats are hidden, it shows `Matches: hidden`, `WR: hidden`.
-- Button to quickly open your profile on **OpenDota**.
-- Shortcut icon to **Dotabuff** in the top‑right corner of the card.
+- [Millennium](https://steambrew.app/) v2.30.0 or higher
+- Windows or Linux
+- Public Steam profile (for best results)
 
-> All data is fetched from OpenDota and **may differ from what you see in the Dota 2 client**.
+## Installation
 
----
+### Method 1: Millennium Plugin Installer (Recommended)
 
-## 📥 Installation
+1. Open Steam with Millennium installed
+2. Go to **Steam** → **Millennium** → **Plugins**
+3. Click **Install a plugin**
+4. Paste the Plugin ID and click **Install**
+5. Restart Steam when prompted
 
-> It is recommended to install plugins only from trusted sources. Always review the code before installing.
+### Method 2: Manual Installation
 
-1. Download the latest plugin build (`dotastats-x.y.z.zip`).
-2. Extract the archive contents into your Steam plugins folder:
-   - default on Windows: `C:\Program Files (x86)\Steam\plugins\dotastats`.
-3. Make sure the structure looks roughly like this:
+1. Download the latest release from [Releases](https://github.com/BambooFury/Dota-Stats/releases)
+2. Extract to your Steam plugins folder:
+   - **Windows:** `C:\Program Files (x86)\Steam\plugins\dotastats`
+   - **Linux:** `~/.millennium/plugins/dotastats`
+3. Restart Steam
+4. Enable the plugin in Millennium settings
 
-   ```text
-   Steam/
-    └─ plugins/
-       └─ dotastats/
-          ├─ backend/
-          ├─ frontend/
-          ├─ webkit/
-          ├─ plugin.json
-          └─ ...
-   ```
-
-4. Restart Steam with Millennium installed.
-5. Open the Millennium settings and enable the **Dota 2 OpenDota Stats** plugin.
-
----
-
-## 🛠 Building
-
-Clone the repository:
+## Building from Source
 
 ```bash
-git clone https://github.com/BambooFury/dotastats.git
-cd dotastats
-```
+# Clone the repository
+git clone https://github.com/BambooFury/Dota-Stats.git
+cd Dota-Stats
 
-Install dependencies and build the frontend:
-
-```bash
+# Install dependencies
 npm install
+
+# Build the plugin
 npm run build
 ```
 
-The `npm run build` command copies the compiled webkit bundle from `.millennium/Dist/webkit.js` to `webkit/webkit.js`.
+## How It Works
 
-After building, move the `dotastats` folder into your Steam plugins directory (see the Installation section).
+The plugin uses the [OpenDota API](https://docs.opendota.com/) to fetch player statistics and displays them in a custom widget on Steam profile pages. All data is fetched in real-time and may differ slightly from what you see in the Dota 2 client.
+
+## Data Sources
+
+- **Primary:** [OpenDota](https://www.opendota.com/) - Free and open-source Dota 2 statistics
+- **Alternative:** [Dotabuff](https://www.dotabuff.com/) - Quick link for detailed match history
+
+## Privacy
+
+This plugin:
+- ✅ Only fetches publicly available data from OpenDota
+- ✅ Does not collect or store any personal information
+- ✅ Does not modify your Steam profile
+- ✅ Runs entirely locally on your machine
+
+## Troubleshooting
+
+### Stats not loading?
+
+- Make sure your Steam profile is **public**
+- Check that you have played Dota 2 matches (OpenDota needs data to display)
+- Try refreshing the profile page (F5)
+- OpenDota API might be temporarily unavailable
+
+### Plugin not showing?
+
+- Verify Millennium is installed and running
+- Check that the plugin is enabled in Millennium settings
+- Restart Steam completely
+- Check console for errors (F12 in Steam)
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run in development mode with auto-rebuild
+npm run dev
+
+# Build for production
+npm run build
+```
+
+## Tech Stack
+
+- **Frontend:** TypeScript + React (via @steambrew/client)
+- **Backend:** Lua (for system access)
+- **Build System:** Millennium CLI
+- **API:** OpenDota REST API
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- [Millennium](https://steambrew.app/) - The Steam client modding framework
+- [OpenDota](https://www.opendota.com/) - Free Dota 2 statistics API
+- [Valve](https://www.valvesoftware.com/) - Dota 2 rank icons and assets
+
+## Support
+
+If you encounter any issues or have questions:
+
+- Open an [Issue](https://github.com/BambooFury/Dota-Stats/issues)
+- Join the [Millennium Discord](https://steambrew.app/discord)
+- Check the [Millennium Documentation](https://docs.steambrew.app/)
 
 ---
 
-## 📎 Notes
+<div align="center">
 
-- The plugin uses Millennium **WebKit** to inject JavaScript directly into the Steam browser.
-- Do not install plugins from untrusted sources — they have access to the contents of your Steam pages.
-- With many profiles having private or incomplete stats, discrepancies between Dota 2, OpenDota and Dotabuff data are possible.
+Made with ❤️ for the Dota 2 community
 
-**Default Millennium paths:**
+[Report Bug](https://github.com/BambooFury/Dota-Stats/issues) · [Request Feature](https://github.com/BambooFury/Dota-Stats/issues)
 
-- **Windows:** `C:\Program Files (x86)\Steam`  → plugins in `Steam/plugins`.
-- **Unix:** `~/.millennium` (if you are using Millennium there).
-
----
-
-## 📜 License
-
-This project is licensed under the **MIT** license. See [LICENSE](LICENSE) for details.
-
+</div>
