@@ -1,12 +1,14 @@
 {
   "name": "dotastats",
   "version": "1.0.0",
+  "description": "Dota 2 Stats plugin for Millennium",
   "private": true,
-  "description": "Millennium plugin: Dota 2 stats card using OpenDota.",
   "scripts": {
-    "build": "node scripts/build.js"
+    "dev": "millennium dev",
+    "build": "millennium build"
   },
   "devDependencies": {
-    "terser": "^5.36.0"
+    "@steambrew/client": "latest",
+    "typescript": "^5.0.0"
   }
 }

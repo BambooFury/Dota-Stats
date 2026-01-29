@@ -3,14 +3,12 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.log
 
 # Node / JS tooling
 node_modules/
 npm-debug.log*
 yarn-error.log*
 pnpm-lock.yaml
-package-lock.json
 
 # IDE / OS
 .vscode/
@@ -25,10 +23,7 @@ Thumbs.db
 build/
 .cache/
 .millennium/
-
-# Allow committed webkit build output (PluginDatabase expects webkit/)
-!webkit/
-!webkit/**
+*.log
 
 # Millennium / local-only stuff
 steamui/
