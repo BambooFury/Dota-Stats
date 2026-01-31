@@ -1,14 +1,22 @@
 {
   "name": "dotastats",
   "version": "1.0.0",
+  "type": "module",
   "description": "Dota 2 Stats plugin for Millennium",
   "private": true,
   "scripts": {
-    "dev": "millennium dev",
-    "build": "millennium build"
+    "dev": "millennium-ttc --build dev",
+    "watch": "millennium-ttc --build dev --watch",
+    "build": "millennium-ttc --build prod"
+  },
+  "dependencies": {
+    "@steambrew/api": "^5.5.3",
+    "@steambrew/client": "^5.5.3",
+    "@steambrew/ttc": "^2.7.3",
+    "@steambrew/webkit": "^5.5.3"
   },
   "devDependencies": {
-    "@steambrew/client": "latest",
+    "@types/react": "^18.2.0",
     "typescript": "^5.0.0"
   }
 }

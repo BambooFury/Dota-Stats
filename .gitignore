@@ -29,3 +29,6 @@ build/
 steamui/
 
 backend/stratz_token.txt
+
+# Compiled webkit bundles
+webkit/*.js
