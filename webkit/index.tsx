@@ -262,15 +262,21 @@ async function getSteamAccountId(): Promise<string | null> {
 function openURL(url: string) {
   console.log("[DotaStats] Opening URL:", url);
   try {
+    // Try different Steam browser APIs
     if ((window as any).SteamClient?.Browser?.OpenURL) {
       (window as any).SteamClient.Browser.OpenURL(url);
+    } else if ((window as any).SteamClient?.System?.OpenURL) {
+      (window as any).SteamClient.System.OpenURL(url);
     } else if ((window as any).g_PopupManager?.ShowPopupBrowser) {
       (window as any).g_PopupManager.ShowPopupBrowser(url);
     } else {
-      window.open(url, "_blank");
+      // Fallback: open in Steam overlay browser using steam:// protocol
+      const steamUrl = `steam://openurl/${url}`;
+      window.location.href = steamUrl;
     }
   } catch (error) {
     console.error("[DotaStats] Error opening URL:", error);
+    window.open(url, "_blank");
   }
 }
 
