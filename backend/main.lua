@@ -1,6 +1,7 @@
 local logger = require("logger")
 local millennium = require("millennium")
 local fs = require("fs")
+local http = require("http")
 
 local function trim(s)
     return (tostring(s):gsub("^%s+", ""):gsub("%s+$", ""))
@@ -148,30 +149,26 @@ local function stratz_graphql(steam_account_id)
         tostring(steam_account_id)
     )
 
-    -- Check if we're on Windows (PowerShell approach)
-    local is_windows = package.config:sub(1, 1) == "\\"
-    if not is_windows then
-        return nil, "STRATZ backend is currently Windows-only"
+    -- Use Millennium's http module for safe HTTP requests
+    local success, response = pcall(function()
+        return http.post("https://api.stratz.com/graphql", {
+            headers = {
+                ["Authorization"] = "Bearer " .. token,
+                ["Content-Type"] = "application/json"
+            },
+            body = body
+        })
+    end)
+
+    if not success then
+        return nil, "HTTP request failed: " .. tostring(response)
     end
 
-    -- Use -WindowStyle Hidden to prevent CMD window flash
-    local ps = string.format(
-        'powershell -NoProfile -WindowStyle Hidden -Command "$ErrorActionPreference=\\"Stop\\"; $u=\\"https://api.stratz.com/graphql\\"; $h=@{ Authorization=\\"Bearer %s\\"; \\"Content-Type\\"=\\"application/json\\" }; $b=\'%s\'; (Invoke-RestMethod -Method Post -Uri $u -Headers $h -Body $b | ConvertTo-Json -Depth 10 -Compress)"',
-        token,
-        body:gsub("'", "''")
-    )
-
-    local p = io.popen('cmd /c ' .. ps .. ' 2>nul', 'r')
-    if not p then
-        return nil, "failed to start PowerShell"
-    end
-    local out = p:read("*a")
-    p:close()
-    out = trim(out)
-    if out == "" then
+    if not response or not response.body then
         return nil, "empty response"
     end
-    return out, nil
+
+    return response.body, nil
 end
 
 function GetDotaStatsStratz(steamAccountId)
