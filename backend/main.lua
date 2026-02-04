@@ -1,7 +1,6 @@
 local logger = require("logger")
 local millennium = require("millennium")
 local fs = require("fs")
-local http = require("http")
 
 local function trim(s)
     return (tostring(s):gsub("^%s+", ""):gsub("%s+$", ""))
@@ -103,87 +102,6 @@ local function on_unload()
     logger:info("[dotastats] unloading")
 end
 
-local function read_stratz_token()
-    local token_path = fs.join(get_plugin_dir(), "backend", "stratz_token.txt")
-    
-    if not fs.exists(token_path) then
-        return nil, "stratz_token.txt not found"
-    end
-    
-    local f = io.open(token_path, "rb")
-    if not f then
-        return nil, "failed to open stratz_token.txt"
-    end
-    
-    local token = f:read("*a") or ""
-    f:close()
-    token = trim(token)
-    
-    if token == "" then
-        return nil, "stratz_token.txt is empty"
-    end
-    
-    return token, nil
-end
-
-local function json_escape(s)
-    s = tostring(s)
-    s = s:gsub("\\", "\\\\")
-    s = s:gsub('"', '\\"')
-    s = s:gsub("\r", "\\r")
-    s = s:gsub("\n", "\\n")
-    return s
-end
-
-local function stratz_graphql(steam_account_id)
-    local token, err = read_stratz_token()
-    if not token then
-        return nil, err
-    end
-
-    -- ranks.rank is the season rank id; we take the latest entry.
-    local query = [[query PlayerCard($steamAccountId: Long!) { player(steamAccountId: $steamAccountId) { steamAccountId matchCount winCount ranks { rank } leaderboardRanks(skip: 0, take: 1) { rank } } }]]
-    local body = string.format(
-        '{"query":"%s","variables":{"steamAccountId":%s}}',
-        json_escape(query),
-        tostring(steam_account_id)
-    )
-
-    -- Use Millennium's http module for safe HTTP requests
-    local success, response = pcall(function()
-        return http.post("https://api.stratz.com/graphql", {
-            headers = {
-                ["Authorization"] = "Bearer " .. token,
-                ["Content-Type"] = "application/json"
-            },
-            body = body
-        })
-    end)
-
-    if not success then
-        return nil, "HTTP request failed: " .. tostring(response)
-    end
-
-    if not response or not response.body then
-        return nil, "empty response"
-    end
-
-    return response.body, nil
-end
-
-function GetDotaStatsStratz(steamAccountId)
-    local sid = tonumber(steamAccountId)
-    if not sid then
-        return "{\"success\":false,\"error\":\"invalid steamAccountId\"}"
-    end
-
-    local out, err = stratz_graphql(sid)
-    if not out then
-        return string.format('{"success":false,"error":"%s"}', json_escape(err or "unknown error"))
-    end
-    return out
-end
-
 -- Called from frontend to confirm that webkit/index.js executed.
 function FrontendPing()
     logger:info("[dotastats] FrontendPing received")
@@ -226,6 +144,5 @@ return {
     on_unload = on_unload,
     FrontendPing = FrontendPing,
     BackendLog = BackendLog,
-    WebkitPing = WebkitPing,
-    GetDotaStatsStratz = GetDotaStatsStratz
+    WebkitPing = WebkitPing
 }
