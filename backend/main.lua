@@ -112,23 +112,6 @@ end
 function BackendLog(message)
     local msg = tostring(message)
     logger:info("[dotastats] frontend: " .. msg)
-    
-    -- Check if this is a URL opening request
-    if msg:match("^Opening OpenDota:") or msg:match("^Opening Dotabuff:") then
-        local url = msg:match("https://[%w%.%-_/]+")
-        if url then
-            logger:info("[dotastats] Attempting to open URL in Steam: " .. url)
-            -- Try to open URL using Steam's internal browser
-            local is_windows = package.config:sub(1, 1) == "\\"
-            if is_windows then
-                -- Use Steam protocol to open in Steam overlay browser
-                os.execute('start "" "steam://openurl/' .. url .. '"')
-            else
-                os.execute('xdg-open "steam://openurl/' .. url .. '"')
-            end
-        end
-    end
-    
     return "ok"
 end
 
