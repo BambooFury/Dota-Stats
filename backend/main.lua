@@ -16,7 +16,7 @@ local function copy_rank_icons()
     -- Wrap everything in pcall to prevent crashes
     local success, err = pcall(function()
         local plugin_dir = get_plugin_dir()
-        local ranks_dir = fs.join(plugin_dir, "frontend", "ranks")
+        local ranks_dir = fs.join(plugin_dir, "static")
         local steam_path = millennium.steam_path()
         local dest_dir = fs.join(steam_path, "steamui", "DotaRanks")
 
@@ -65,14 +65,17 @@ local function copy_rank_icons()
                     local ok, copy_err = fs.copy(src, dst)
                     if ok then
                         copied = copied + 1
+                        logger:info("[dotastats] copied: " .. tostring(filename))
                     else
                         logger:error("[dotastats] failed to copy " .. tostring(filename) .. ": " .. tostring(copy_err))
                     end
+                else
+                    logger:warn("[dotastats] skipping non-file: " .. tostring(filename))
                 end
             end
         end
 
-        logger:info("[dotastats] copied " .. tostring(copied) .. " rank icons")
+        logger:info("[dotastats] copied " .. tostring(copied) .. " icons total")
     end)
     
     if not success then

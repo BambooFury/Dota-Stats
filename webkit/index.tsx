@@ -72,14 +72,14 @@ function injectStyles() {
   style.textContent = `
     .dotastats-card {
       position: relative;
-      overflow: visible;
-      background: transparent;
+      overflow: hidden;
+      background: rgba(0, 0, 0, 0.35);
       border-radius: 10px;
       padding: 14px 14px 10px;
       color: #f5f5f5;
       font-size: 13px;
       margin-bottom: 10px;
-      box-shadow: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
     }
     .dotastats-dotabuff-btn {
       position: absolute;
@@ -98,12 +98,12 @@ function injectStyles() {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.8));
+      filter: brightness(0.7) drop-shadow(0 0 4px rgba(0, 0, 0, 0.8));
       transition: transform 0.15s ease, filter 0.15s ease;
     }
     .dotastats-dotabuff-btn:hover img {
       transform: translateY(-1px);
-      filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.95));
+      filter: brightness(0.85) drop-shadow(0 0 6px rgba(0, 0, 0, 0.95));
     }
     .dotastats-name-row {
       position: relative;
@@ -208,7 +208,7 @@ function createStatsWidget(): HTMLElement {
   wrapper.className = "account-row";
   wrapper.innerHTML = `
     <div class="dotastats-card">
-      <a id="dotastats-dotabuff" class="dotastats-dotabuff-btn" href="#" target="_blank" title="Open Dotabuff">
+      <a id="dotastats-dotabuff" class="dotastats-dotabuff-btn nolink" href="#" target="_blank" rel="noopener" title="Open Dotabuff">
         <img src="https://steamloopback.host/DotaRanks/dotabuff_icon.png" alt="Dotabuff" />
       </a>
       <div class="dotastats-name-row"><span id="dotastats-name"></span></div>
@@ -227,7 +227,7 @@ function createStatsWidget(): HTMLElement {
         </div>
       </div>
       <div class="dotastats-footer">
-        <a id="dotastats-link" href="#" target="_blank">Show detailed Dota stats</a>
+        <a id="dotastats-link" class="nolink" href="#" target="_blank" rel="noopener">Show detailed Dota stats</a>
         <div class="dotastats-source-note">Data: OpenDota, may differ from Dota 2 client</div>
       </div>
     </div>
@@ -260,22 +260,47 @@ async function getSteamAccountId(): Promise<string | null> {
 }
 
 function openURL(url: string) {
-  console.log("[DotaStats] Opening URL:", url);
+  console.log("[DotaStats] Attempting to open URL:", url);
+  
+  // Log available APIs
+  console.log("[DotaStats] Available APIs:", {
+    hasSteamClient: typeof (window as any).SteamClient !== 'undefined',
+    hasSystemAPI: typeof (window as any).SteamClient?.System !== 'undefined',
+    hasOpenInSystemBrowser: typeof (window as any).SteamClient?.System?.OpenInSystemBrowser === 'function',
+    hasBrowserAPI: typeof (window as any).SteamClient?.Browser !== 'undefined',
+    hasPopupManager: typeof (window as any).g_PopupManager !== 'undefined',
+  });
+  
   try {
-    // Try different Steam browser APIs
-    if ((window as any).SteamClient?.Browser?.OpenURL) {
-      (window as any).SteamClient.Browser.OpenURL(url);
-    } else if ((window as any).SteamClient?.System?.OpenURL) {
-      (window as any).SteamClient.System.OpenURL(url);
-    } else if ((window as any).g_PopupManager?.ShowPopupBrowser) {
-      (window as any).g_PopupManager.ShowPopupBrowser(url);
-    } else {
-      // Fallback: open in Steam overlay browser using steam:// protocol
-      const steamUrl = `steam://openurl/${url}`;
-      window.location.href = steamUrl;
+    // Method 1: Try SteamClient.System.OpenInSystemBrowser (used by other plugins)
+    if (typeof (window as any).SteamClient?.System?.OpenInSystemBrowser === 'function') {
+      console.log("[DotaStats] Using SteamClient.System.OpenInSystemBrowser");
+      (window as any).SteamClient.System.OpenInSystemBrowser(url);
+      return;
     }
+    
+    // Method 2: Try SteamClient.Browser.OpenURL
+    if (typeof (window as any).SteamClient?.Browser?.OpenURL === 'function') {
+      console.log("[DotaStats] Using SteamClient.Browser.OpenURL");
+      (window as any).SteamClient.Browser.OpenURL(url);
+      return;
+    }
+    
+    // Method 3: Try g_PopupManager
+    if (typeof (window as any).g_PopupManager?.ShowPopupBrowser === 'function') {
+      console.log("[DotaStats] Using g_PopupManager.ShowPopupBrowser");
+      (window as any).g_PopupManager.ShowPopupBrowser(url);
+      return;
+    }
+    
+    // Method 4: Try steam:// protocol
+    console.log("[DotaStats] Using steam:// protocol");
+    const steamUrl = `steam://openurl_external/${encodeURIComponent(url)}`;
+    window.location.href = steamUrl;
+    
   } catch (error) {
     console.error("[DotaStats] Error opening URL:", error);
+    console.log("[DotaStats] Falling back to window.open");
     window.open(url, "_blank");
   }
 }
@@ -396,22 +421,18 @@ async function injectWidget(container: Element, accountId: string) {
   const widget = createStatsWidget();
   container.insertBefore(widget, container.children[1] || null);
 
-  // Setup click handlers
-  const openDotaLink = document.getElementById("dotastats-link");
-  const dotabuffLink = document.getElementById("dotastats-dotabuff");
+  // Setup links with direct href (like faceit plugin does)
+  const openDotaLink = document.getElementById("dotastats-link") as HTMLAnchorElement;
+  const dotabuffLink = document.getElementById("dotastats-dotabuff") as HTMLAnchorElement;
 
   if (openDotaLink) {
-    openDotaLink.onclick = (e) => {
-      e.preventDefault();
-      openURL(`https://www.opendota.com/players/${accountId}`);
-    };
+    openDotaLink.href = `https://www.opendota.com/players/${accountId}`;
+    console.log("[DotaStats] OpenDota link set to:", openDotaLink.href);
   }
 
   if (dotabuffLink) {
-    dotabuffLink.onclick = (e) => {
-      e.preventDefault();
-      openURL(`https://www.dotabuff.com/players/${accountId}`);
-    };
+    dotabuffLink.href = `https://www.dotabuff.com/players/${accountId}`;
+    console.log("[DotaStats] Dotabuff link set to:", dotabuffLink.href);
   }
 
   // Load stats
