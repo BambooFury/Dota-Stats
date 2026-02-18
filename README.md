@@ -6,7 +6,7 @@ A [Millennium](https://steambrew.app/) plugin that displays Dota 2 player statis
 
 <br/>
 
-<img src="examplee.png" alt="Dota 2 Stats Preview" width="600" />
+<img src="example.png" alt="Dota 2 Stats Preview" width="600" />
 
 </div>
 
