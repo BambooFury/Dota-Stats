@@ -33,14 +33,7 @@ local function copy_rank_icons()
             end
         end
 
-        -- Check if icons are already copied
-        local sentinel = fs.join(dest_dir, "rank_icon_1_1.png")
-        if fs.exists(sentinel) then
-            logger:info("[dotastats] rank icons already present, skipping copy")
-            return
-        end
-
-        -- Copy all PNG files from ranks directory
+        -- Copy all PNG files from ranks directory (always copy, no sentinel check)
         if not fs.exists(ranks_dir) then
             logger:error("[dotastats] ranks_dir does not exist: " .. tostring(ranks_dir))
             return

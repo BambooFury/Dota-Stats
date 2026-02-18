@@ -43,9 +43,6 @@ export default definePlugin(() => {
     // Webkit модуль будет обрабатывать отображение на странице профиля
   });
 
-  return {
-    title: 'Dota 2 Stats',
-    icon: <IconsModule.Settings />,
-    content: <SettingsContent />,
-  };
+  // Не возвращаем настройки - плагин не будет показываться в меню
+  return {};
 });
