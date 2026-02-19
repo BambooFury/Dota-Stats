@@ -119,9 +119,10 @@ function injectStyles() {
       margin-bottom: 15px;
     }
     .dotastats-loading-text {
-      font-size: 16px;
-      color: #f5f5f5;
-      font-weight: 300;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 400;
+      letter-spacing: 0.5px;
     }
     .dotastats-dotabuff-btn {
       position: absolute;
@@ -140,12 +141,12 @@ function injectStyles() {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      filter: brightness(0.6) drop-shadow(0 0 4px rgba(0, 0, 0, 0.8));
+      filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.8));
       transition: transform 0.15s ease, filter 0.15s ease;
     }
     .dotastats-dotabuff-btn:hover img {
       transform: translateY(-1px);
-      filter: brightness(0.75) drop-shadow(0 0 6px rgba(0, 0, 0, 0.95));
+      filter: brightness(1.1) drop-shadow(0 0 6px rgba(0, 0, 0, 0.95));
     }
     .dotastats-name-row {
       position: relative;
@@ -168,11 +169,12 @@ function injectStyles() {
     .dotastats-plus-icon {
       display: inline-block;
       margin-left: 5px;
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
       vertical-align: middle;
       position: relative;
       top: -1px;
+      object-fit: contain;
     }
     .dotastats-rank {
       position: relative;
@@ -342,7 +344,7 @@ async function fetchDotaStats(accountId: string): Promise<DotaStats | null> {
   }
 }
 
-function updateWidget(stats: DotaStats, accountId: string) {
+function updateWidget(stats: DotaStats, accountId: string, steamloopbackReady: boolean) {
   console.log("[DotaStats] Updating widget with stats:", stats);
   
   const matchesEl = document.getElementById("dotastats-matches");
@@ -386,8 +388,8 @@ function updateWidget(stats: DotaStats, accountId: string) {
     console.log("[DotaStats] Icon URL:", iconUrl);
     
     if (rankIconEl) {
-      // Try to load icon with delay
-      setTimeout(() => {
+      if (steamloopbackReady) {
+        // Try to load icon only if steamloopback is ready
         rankIconEl.src = iconUrl;
         rankIconEl.classList.remove("dotastats-rank-icon-unranked");
         rankIconEl.style.display = 'block';
@@ -405,7 +407,16 @@ function updateWidget(stats: DotaStats, accountId: string) {
             rankCircleEl.innerHTML = `<div style="text-align: center; font-size: 13px; font-weight: 700; line-height: 1.3; color: #fff;">${rankText}</div>`;
           }
         };
-      }, 500);
+      } else {
+        // steamloopback not ready, use text fallback immediately
+        console.log("[DotaStats] Using text fallback (steamloopback not ready)");
+        rankIconEl.style.display = 'none';
+        if (rankCircleEl) {
+          const rankName = RANK_NAMES[stats.rank] || "Rank";
+          const rankText = stats.rank >= 8 ? rankName : `${rankName}<br>${stats.stars}`;
+          rankCircleEl.innerHTML = `<div style="text-align: center; font-size: 13px; font-weight: 700; line-height: 1.3; color: #fff;">${rankText}</div>`;
+        }
+      }
     }
 
     if (rankCircleEl) {
@@ -428,7 +439,7 @@ function updateWidget(stats: DotaStats, accountId: string) {
   } else {
     console.log("[DotaStats] No rank, showing unranked");
     if (rankIconEl) {
-      setTimeout(() => {
+      if (steamloopbackReady) {
         rankIconEl.src = "https://steamloopback.host/DotaRanks/rank_icon_unranked.png";
         rankIconEl.classList.add("dotastats-rank-icon-unranked");
         rankIconEl.style.display = 'block';
@@ -440,7 +451,14 @@ function updateWidget(stats: DotaStats, accountId: string) {
             rankCircleEl.innerHTML = `<div style="text-align: center; font-size: 13px; font-weight: 700; color: #fff;">Unranked</div>`;
           }
         };
-      }, 500);
+      } else {
+        // steamloopback not ready, use text fallback immediately
+        console.log("[DotaStats] Using text fallback for unranked (steamloopback not ready)");
+        rankIconEl.style.display = 'none';
+        if (rankCircleEl) {
+          rankCircleEl.innerHTML = `<div style="text-align: center; font-size: 13px; font-weight: 700; color: #fff;">Unranked</div>`;
+        }
+      }
     }
     if (rankLabelEl) rankLabelEl.textContent = "Unranked";
     if (topRankEl) topRankEl.style.display = "none";
@@ -448,6 +466,40 @@ function updateWidget(stats: DotaStats, accountId: string) {
       rankCircleEl.style.boxShadow = "0 0 0 2px rgba(0, 0, 0, 0.65), 0 0 14px rgba(255, 255, 255, 0.95)";
     }
   }
+}
+
+async function waitForSteamLoopback(maxAttempts = 3, delayMs = 200): Promise<boolean> {
+  console.log("[DotaStats] Checking steamloopback availability...");
+  
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      // Try to fetch a small icon to check if steamloopback is ready
+      const testUrl = 'https://steamloopback.host/DotaRanks/dotabuff_icon.png';
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 500);
+      
+      const response = await fetch(testUrl, { 
+        method: 'HEAD',
+        signal: controller.signal 
+      });
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        console.log(`[DotaStats] steamloopback ready after ${attempt} attempt(s)`);
+        return true;
+      }
+    } catch (error) {
+      console.log(`[DotaStats] steamloopback not ready, attempt ${attempt}/${maxAttempts}`);
+    }
+    
+    // Wait before next attempt
+    if (attempt < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+  }
+  
+  console.warn("[DotaStats] steamloopback not available, will use text fallback");
+  return false;
 }
 
 export default async function WebkitMain() {
@@ -471,6 +523,12 @@ export default async function WebkitMain() {
 
     try {
       injectStyles();
+
+      // Wait for steamloopback to be ready
+      const steamloopbackReady = await waitForSteamLoopback();
+      if (!steamloopbackReady) {
+        console.warn("[DotaStats] steamloopback not ready, icons may not load");
+      }
 
       const accountId = await getSteamAccountId();
       if (!accountId) {
@@ -526,7 +584,7 @@ export default async function WebkitMain() {
       rightCol[0].insertBefore(statsHTML, rightCol[0].children[1]);
 
       if (stats) {
-        updateWidget(stats, accountId);
+        updateWidget(stats, accountId, steamloopbackReady);
         console.log("[DotaStats] Widget injected successfully");
       } else {
         const matchesEl = document.getElementById("dotastats-matches");
