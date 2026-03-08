@@ -364,7 +364,7 @@ function updateWidget(stats: DotaStats, accountId: string, steamloopbackReady: b
     if (stats.plusSubscriber) {
       const plusIcon = document.createElement('img');
       plusIcon.className = 'dotastats-plus-icon';
-      plusIcon.src = 'https://steamloopback.host/dotastats/dota_plus.png';
+      plusIcon.src = 'https://steamloopback.host/DotaRanks/dota_plus.png';
       plusIcon.alt = 'Dota Plus';
       plusIcon.onerror = () => {
         // Fallback to star emoji if image fails to load
@@ -382,7 +382,7 @@ function updateWidget(stats: DotaStats, accountId: string, steamloopbackReady: b
   console.log("[DotaStats] Setting rank - rank:", stats.rank, "stars:", stats.stars);
 
   if (stats.rank && stats.rank > 0) {
-    const iconUrl = `https://steamloopback.host/dotastats/rank_icon_${stats.rank}_${stats.stars}.png`;
+    const iconUrl = `https://steamloopback.host/DotaRanks/rank_icon_${stats.rank}_${stats.stars}.png`;
     console.log("[DotaStats] Icon URL:", iconUrl);
     
     if (rankIconEl && rankCircleEl) {
@@ -435,7 +435,7 @@ function updateWidget(stats: DotaStats, accountId: string, steamloopbackReady: b
       rankCircleEl.style.boxShadow = "0 0 0 2px rgba(0, 0, 0, 0.65), 0 0 14px rgba(255, 255, 255, 0.95)";
       
       // Try to load unranked icon in background and replace if successful
-      const unrankedUrl = "https://steamloopback.host/dotastats/rank_icon_unranked.png";
+      const unrankedUrl = "https://steamloopback.host/DotaRanks/rank_icon_unranked.png";
       console.log("[DotaStats] Starting unranked icon load attempts...");
       preloadRankIcon(unrankedUrl, 3, 1000).then((iconLoaded) => {
         if (iconLoaded && rankIconEl) {
@@ -464,7 +464,7 @@ async function waitForSteamLoopback(maxAttempts = 5, delayMs = 300): Promise<boo
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       // Try to fetch a small icon to check if steamloopback is ready
-      const testUrl = 'https://steamloopback.host/dotastats/dotabuff_icon.png';
+      const testUrl = 'https://steamloopback.host/DotaRanks/dotabuff_icon.png';
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 1000);
       
@@ -593,12 +593,12 @@ export default async function WebkitMain() {
       statsHTML.innerHTML = `
         <div class="dotastats-card">
           <a id="dotastats-dotabuff" class="dotastats-dotabuff-btn nolink" href="https://www.dotabuff.com/players/${accountId}" target="_blank" rel="noopener">
-            <img src="https://steamloopback.host/dotastats/dotabuff_icon.png" onerror="this.style.display='none'" alt="Dotabuff" />
+            <img src="https://steamloopback.host/DotaRanks/dotabuff_icon.png" onerror="this.style.display='none'" alt="Dotabuff" />
           </a>
           <div class="dotastats-name-row"><span id="dotastats-name"></span></div>
           <div class="dotastats-rank">
             <div id="dotastats-rank-circle" class="dotastats-rank-circle">
-              <img id="dotastats-rank-icon" class="dotastats-rank-icon" src="https://steamloopback.host/dotastats/rank_icon_unranked.png" alt="Unranked" />
+              <img id="dotastats-rank-icon" class="dotastats-rank-icon" src="https://steamloopback.host/DotaRanks/rank_icon_unranked.png" alt="Unranked" />
               <div id="dotastats-top-rank" class="dotastats-top-rank" style="display:none;"></div>
             </div>
           </div>
