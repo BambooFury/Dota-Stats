@@ -392,7 +392,16 @@ function updateWidget(stats: DotaStats, accountId: string, steamloopbackReady: b
       const rankText = stats.rank >= 8 ? rankName : `${rankName}<br>${stats.stars}`;
       const glowColor = RANK_COLORS[stats.rank] || "rgba(255, 190, 90, 0.8)";
       
-      rankCircleEl.innerHTML = `<div style="text-align: center; font-size: 13px; font-weight: 700; line-height: 1.3; color: #fff;">${rankText}</div>`;
+      // Don't use innerHTML - it destroys topRankEl! Instead, add text div manually
+      const existingTextDiv = rankCircleEl.querySelector('div:not([id])');
+      if (existingTextDiv) {
+        existingTextDiv.innerHTML = rankText;
+      } else {
+        const textDiv = document.createElement('div');
+        textDiv.style.cssText = 'text-align: center; font-size: 13px; font-weight: 700; line-height: 1.3; color: #fff;';
+        textDiv.innerHTML = rankText;
+        rankCircleEl.insertBefore(textDiv, rankCircleEl.firstChild);
+      }
       rankCircleEl.style.boxShadow = `0 0 0 2px rgba(0, 0, 0, 0.65), 0 0 14px ${glowColor}`;
       
       // Try to load icon in background and replace if successful
@@ -403,9 +412,13 @@ function updateWidget(stats: DotaStats, accountId: string, steamloopbackReady: b
           rankIconEl.src = iconUrl;
           rankIconEl.classList.remove("dotastats-rank-icon-unranked");
           rankIconEl.style.display = 'block';
-          // Clear text fallback
+          // Clear text fallback but keep topRankEl
           if (rankCircleEl) {
-            rankCircleEl.innerHTML = '';
+            // Remove only the text div, not topRankEl
+            const textDiv = rankCircleEl.querySelector('div:not([id])');
+            if (textDiv) {
+              textDiv.remove();
+            }
             rankCircleEl.appendChild(rankIconEl);
           }
         } else {
@@ -421,7 +434,7 @@ function updateWidget(stats: DotaStats, accountId: string, steamloopbackReady: b
     }
 
     if (topRankEl && stats.rank === 8 && stats.leaderboardRank) {
-      topRankEl.textContent = Number(stats.leaderboardRank).toLocaleString("en-US");
+      topRankEl.textContent = `#${Number(stats.leaderboardRank).toLocaleString("en-US")}`;
       topRankEl.style.display = "block";
     } else if (topRankEl) {
       topRankEl.style.display = "none";
@@ -431,7 +444,17 @@ function updateWidget(stats: DotaStats, accountId: string, steamloopbackReady: b
     if (rankIconEl && rankCircleEl) {
       // Show nice text fallback immediately
       rankIconEl.style.display = 'none';
-      rankCircleEl.innerHTML = `<div style="text-align: center; font-size: 13px; font-weight: 700; color: #fff;">Unranked</div>`;
+      
+      // Don't use innerHTML - it destroys topRankEl! Instead, add text div manually
+      const existingTextDiv = rankCircleEl.querySelector('div:not([id])');
+      if (existingTextDiv) {
+        existingTextDiv.innerHTML = 'Unranked';
+      } else {
+        const textDiv = document.createElement('div');
+        textDiv.style.cssText = 'text-align: center; font-size: 13px; font-weight: 700; color: #fff;';
+        textDiv.textContent = 'Unranked';
+        rankCircleEl.insertBefore(textDiv, rankCircleEl.firstChild);
+      }
       rankCircleEl.style.boxShadow = "0 0 0 2px rgba(0, 0, 0, 0.65), 0 0 14px rgba(255, 255, 255, 0.95)";
       
       // Try to load unranked icon in background and replace if successful
@@ -445,7 +468,11 @@ function updateWidget(stats: DotaStats, accountId: string, steamloopbackReady: b
           rankIconEl.style.display = 'block';
           // Clear text fallback
           if (rankCircleEl) {
-            rankCircleEl.innerHTML = '';
+            // Remove only the text div
+            const textDiv = rankCircleEl.querySelector('div:not([id])');
+            if (textDiv) {
+              textDiv.remove();
+            }
             rankCircleEl.appendChild(rankIconEl);
           }
         } else {
