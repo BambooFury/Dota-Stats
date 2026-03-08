@@ -27,8 +27,8 @@ A [Millennium](https://steambrew.app/) plugin that displays Dota 2 player statis
 
 1. Open Steam with Millennium installed
 2. Go to **Steam** → **Millennium** → **Plugins**
-3. Click **Install a plugin**
-4. Search for "Dota 2 Stats" and click **Install**
+3. Click **"Install a plugin"**
+4. Enter the plugin ID and click **"Install"**
 5. Restart Steam when prompted
 
 ### Method 2: Manual Installation
