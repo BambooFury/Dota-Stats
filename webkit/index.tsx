@@ -344,9 +344,7 @@ async function fetchDotaStats(accountId: string): Promise<DotaStats | null> {
   }
 }
 
-function updateWidget(stats: DotaStats, accountId: string, steamloopbackReady: boolean) {
-  console.log("[DotaStats] Updating widget with stats:", stats);
-  
+function updateWidget(stats: DotaStats, iconPreloaded: boolean = false) {
   const matchesEl = document.getElementById("dotastats-matches");
   const winrateEl = document.getElementById("dotastats-winrate");
   const mmrEl = document.getElementById("dotastats-mmr");
@@ -360,71 +358,30 @@ function updateWidget(stats: DotaStats, accountId: string, steamloopbackReady: b
   if (winrateEl) winrateEl.textContent = stats.matches > 0 ? `${stats.winrate.toFixed(2)}%` : "hidden";
   if (nameEl) {
     nameEl.textContent = stats.personaName || "";
-    // Add Dota Plus icon if player has subscription
     if (stats.plusSubscriber) {
       const plusIcon = document.createElement('img');
       plusIcon.className = 'dotastats-plus-icon';
       plusIcon.src = 'https://steamloopback.host/DotaRanks/dota_plus.png';
       plusIcon.alt = 'Dota Plus';
-      plusIcon.onerror = () => {
-        // Fallback to star emoji if image fails to load
-        plusIcon.style.display = 'none';
-        const fallback = document.createElement('span');
-        fallback.className = 'dotastats-plus-icon';
-        fallback.innerHTML = '⭐';
-        nameEl.appendChild(fallback);
-      };
       nameEl.appendChild(plusIcon);
     }
   }
   if (mmrEl) mmrEl.textContent = stats.mmr != null ? String(stats.mmr) : "";
 
-  console.log("[DotaStats] Setting rank - rank:", stats.rank, "stars:", stats.stars);
-
   if (stats.rank && stats.rank > 0) {
     const iconUrl = `https://steamloopback.host/DotaRanks/rank_icon_${stats.rank}_${stats.stars}.png`;
-    console.log("[DotaStats] Icon URL:", iconUrl);
     
     if (rankIconEl && rankCircleEl) {
-      // Show nice text fallback immediately
-      rankIconEl.style.display = 'none';
-      const rankName = RANK_NAMES[stats.rank] || "Rank";
-      const rankText = stats.rank >= 8 ? rankName : `${rankName}<br>${stats.stars}`;
       const glowColor = RANK_COLORS[stats.rank] || "rgba(255, 190, 90, 0.8)";
-      
-      // Don't use innerHTML - it destroys topRankEl! Instead, add text div manually
-      const existingTextDiv = rankCircleEl.querySelector('div:not([id])');
-      if (existingTextDiv) {
-        existingTextDiv.innerHTML = rankText;
-      } else {
-        const textDiv = document.createElement('div');
-        textDiv.style.cssText = 'text-align: center; font-size: 13px; font-weight: 700; line-height: 1.3; color: #fff;';
-        textDiv.innerHTML = rankText;
-        rankCircleEl.insertBefore(textDiv, rankCircleEl.firstChild);
-      }
       rankCircleEl.style.boxShadow = `0 0 0 2px rgba(0, 0, 0, 0.65), 0 0 14px ${glowColor}`;
       
-      // Try to load icon in background and replace if successful
-      console.log("[DotaStats] Starting icon load attempts...");
-      preloadRankIcon(iconUrl, 3, 1000).then((iconLoaded) => {
-        if (iconLoaded && rankIconEl) {
-          console.log("[DotaStats] Icon loaded, displaying:", iconUrl);
-          rankIconEl.src = iconUrl;
-          rankIconEl.classList.remove("dotastats-rank-icon-unranked");
-          rankIconEl.style.display = 'block';
-          // Clear text fallback but keep topRankEl
-          if (rankCircleEl) {
-            // Remove only the text div, not topRankEl
-            const textDiv = rankCircleEl.querySelector('div:not([id])');
-            if (textDiv) {
-              textDiv.remove();
-            }
-            rankCircleEl.appendChild(rankIconEl);
-          }
-        } else {
-          console.log("[DotaStats] Icon not available, using text fallback");
-        }
-      });
+      if (iconPreloaded) {
+        rankIconEl.src = iconUrl;
+        rankIconEl.classList.remove("dotastats-rank-icon-unranked");
+        rankIconEl.style.display = 'block';
+      } else {
+        rankIconEl.style.display = 'none';
+      }
     }
 
     if (rankLabelEl) {
@@ -440,60 +397,30 @@ function updateWidget(stats: DotaStats, accountId: string, steamloopbackReady: b
       topRankEl.style.display = "none";
     }
   } else {
-    console.log("[DotaStats] No rank, showing unranked");
     if (rankIconEl && rankCircleEl) {
-      // Show nice text fallback immediately
-      rankIconEl.style.display = 'none';
+      const glowColor = "rgba(255, 255, 255, 0.95)";
+      rankCircleEl.style.boxShadow = `0 0 0 2px rgba(0, 0, 0, 0.65), 0 0 14px ${glowColor}`;
       
-      // Don't use innerHTML - it destroys topRankEl! Instead, add text div manually
-      const existingTextDiv = rankCircleEl.querySelector('div:not([id])');
-      if (existingTextDiv) {
-        existingTextDiv.innerHTML = 'Unranked';
+      if (iconPreloaded) {
+        const unrankedUrl = "https://steamloopback.host/DotaRanks/rank_icon_unranked.png";
+        rankIconEl.src = unrankedUrl;
+        rankIconEl.classList.add("dotastats-rank-icon-unranked");
+        rankIconEl.style.display = 'block';
       } else {
-        const textDiv = document.createElement('div');
-        textDiv.style.cssText = 'text-align: center; font-size: 13px; font-weight: 700; color: #fff;';
-        textDiv.textContent = 'Unranked';
-        rankCircleEl.insertBefore(textDiv, rankCircleEl.firstChild);
+        rankIconEl.style.display = 'none';
       }
-      rankCircleEl.style.boxShadow = "0 0 0 2px rgba(0, 0, 0, 0.65), 0 0 14px rgba(255, 255, 255, 0.95)";
-      
-      // Try to load unranked icon in background and replace if successful
-      const unrankedUrl = "https://steamloopback.host/DotaRanks/rank_icon_unranked.png";
-      console.log("[DotaStats] Starting unranked icon load attempts...");
-      preloadRankIcon(unrankedUrl, 3, 1000).then((iconLoaded) => {
-        if (iconLoaded && rankIconEl) {
-          console.log("[DotaStats] Unranked icon loaded, displaying");
-          rankIconEl.src = unrankedUrl;
-          rankIconEl.classList.add("dotastats-rank-icon-unranked");
-          rankIconEl.style.display = 'block';
-          // Clear text fallback
-          if (rankCircleEl) {
-            // Remove only the text div
-            const textDiv = rankCircleEl.querySelector('div:not([id])');
-            if (textDiv) {
-              textDiv.remove();
-            }
-            rankCircleEl.appendChild(rankIconEl);
-          }
-        } else {
-          console.log("[DotaStats] Unranked icon not available, using text fallback");
-        }
-      });
     }
     if (rankLabelEl) rankLabelEl.textContent = "Unranked";
     if (topRankEl) topRankEl.style.display = "none";
   }
 }
 
-async function waitForSteamLoopback(maxAttempts = 5, delayMs = 300): Promise<boolean> {
-  console.log("[DotaStats] Checking steamloopback availability...");
-  
+async function waitForSteamLoopback(maxAttempts = 2, delayMs = 200): Promise<boolean> {
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
-      // Try to fetch a small icon to check if steamloopback is ready
       const testUrl = 'https://steamloopback.host/DotaRanks/dotabuff_icon.png';
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 1000);
+      const timeoutId = setTimeout(() => controller.abort(), 250);
       
       const response = await fetch(testUrl, { 
         method: 'HEAD',
@@ -502,72 +429,50 @@ async function waitForSteamLoopback(maxAttempts = 5, delayMs = 300): Promise<boo
       clearTimeout(timeoutId);
       
       if (response.ok) {
-        console.log(`[DotaStats] steamloopback ready after ${attempt} attempt(s)`);
         return true;
       }
     } catch (error) {
-      console.log(`[DotaStats] steamloopback not ready, attempt ${attempt}/${maxAttempts}`);
+      // Silent fail
     }
     
-    // Wait before next attempt
     if (attempt < maxAttempts) {
       await new Promise(resolve => setTimeout(resolve, delayMs));
     }
   }
   
-  console.warn("[DotaStats] steamloopback not available, will use text fallback");
+  // Silently reload the page
+  window.location.replace(window.location.href);
   return false;
 }
 
-async function preloadRankIcon(iconUrl: string, maxRetries = 10, retryDelay = 500): Promise<boolean> {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    const success = await new Promise<boolean>((resolve) => {
-      const img = new Image();
-      const timer = setTimeout(() => {
-        img.src = '';
-        resolve(false);
-      }, 2000);
-      
-      img.onload = () => {
-        clearTimeout(timer);
-        resolve(true);
-      };
-      
-      img.onerror = () => {
-        clearTimeout(timer);
-        resolve(false);
-      };
-      
-      img.src = iconUrl;
-    });
+async function preloadRankIcon(iconUrl: string): Promise<boolean> {
+  return new Promise<boolean>((resolve) => {
+    const img = new Image();
+    const timer = setTimeout(() => {
+      img.src = '';
+      resolve(false);
+    }, 500);
     
-    if (success) {
-      console.log(`[DotaStats] Icon loaded successfully on attempt ${attempt}: ${iconUrl}`);
-      return true;
-    }
+    img.onload = () => {
+      clearTimeout(timer);
+      resolve(true);
+    };
     
-    console.log(`[DotaStats] Icon load failed, attempt ${attempt}/${maxRetries}, retrying...`);
+    img.onerror = () => {
+      clearTimeout(timer);
+      resolve(false);
+    };
     
-    if (attempt < maxRetries) {
-      await new Promise(resolve => setTimeout(resolve, retryDelay));
-    }
-  }
-  
-  console.error(`[DotaStats] Failed to load icon after ${maxRetries} attempts: ${iconUrl}`);
-  return false;
+    img.src = iconUrl;
+  });
 }
 
 export default async function WebkitMain() {
-  console.log("[DotaStats] Initializing...");
-
   const rightCol = await Millennium.findElement(document, '.profile_rightcol');
 
   if (rightCol.length > 0) {
-    console.log("[DotaStats] Detected rightcol");
-    
     // Check if widget already exists to prevent duplicates
     if (document.getElementById('dotastats-widget-container')) {
-      console.log("[DotaStats] Widget already exists, skipping injection");
       return;
     }
 
@@ -586,28 +491,30 @@ export default async function WebkitMain() {
     try {
       injectStyles();
 
-      // Wait for steamloopback to be ready
-      const steamloopbackReady = await waitForSteamLoopback();
-      if (!steamloopbackReady) {
-        console.warn("[DotaStats] steamloopback not ready, icons may not load");
-      }
-
       const accountId = await getSteamAccountId();
       if (!accountId) {
         throw new Error("Could not get account ID");
       }
 
-      // Start loading stats and minimum display time in parallel
-      const loadingStartTime = Date.now();
-      const minLoadingTime = 800;
+      // Load stats and check steamloopback in parallel
+      const [stats, steamloopbackReady] = await Promise.all([
+        fetchDotaStats(accountId),
+        waitForSteamLoopback()
+      ]);
 
-      const stats = await fetchDotaStats(accountId);
+      // If steamloopback not ready, page will reload automatically
+      if (!steamloopbackReady) {
+        return;
+      }
 
-      // Wait for minimum loading time
-      const elapsedTime = Date.now() - loadingStartTime;
-      const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
-      if (remainingTime > 0) {
-        await new Promise(resolve => setTimeout(resolve, remainingTime));
+      // Preload the specific rank icon we need
+      let iconPreloaded = false;
+      if (stats) {
+        const iconUrl = stats.rank && stats.rank > 0
+          ? `https://steamloopback.host/DotaRanks/rank_icon_${stats.rank}_${stats.stars}.png`
+          : "https://steamloopback.host/DotaRanks/rank_icon_unranked.png";
+        
+        iconPreloaded = await preloadRankIcon(iconUrl);
       }
 
       // Remove loading spinner
@@ -620,7 +527,7 @@ export default async function WebkitMain() {
       statsHTML.innerHTML = `
         <div class="dotastats-card">
           <a id="dotastats-dotabuff" class="dotastats-dotabuff-btn nolink" href="https://www.dotabuff.com/players/${accountId}" target="_blank" rel="noopener">
-            <img src="https://steamloopback.host/DotaRanks/dotabuff_icon.png" onerror="this.style.display='none'" alt="Dotabuff" />
+            <img src="https://steamloopback.host/DotaRanks/dotabuff_icon.png" alt="Dotabuff" />
           </a>
           <div class="dotastats-name-row"><span id="dotastats-name"></span></div>
           <div class="dotastats-rank">
@@ -647,8 +554,7 @@ export default async function WebkitMain() {
       rightCol[0].insertBefore(statsHTML, rightCol[0].children[1]);
 
       if (stats) {
-        updateWidget(stats, accountId, steamloopbackReady);
-        console.log("[DotaStats] Widget injected successfully");
+        updateWidget(stats, iconPreloaded);
       } else {
         const matchesEl = document.getElementById("dotastats-matches");
         const winrateEl = document.getElementById("dotastats-winrate");
@@ -659,24 +565,6 @@ export default async function WebkitMain() {
       }
     } catch (error) {
       console.error("[DotaStats] Error:", error);
-
-      try {
-        rightCol[0].removeChild(loadingHTML);
-      } catch (e) {
-        console.error("[DotaStats] Error removing loading widget:", e);
-      }
-
-      const errorDiv = document.createElement('div');
-      errorDiv.id = "dotastats-widget-container";
-      errorDiv.className = 'account-row';
-      errorDiv.innerHTML = `
-        <div class="dotastats-card">
-          <div style="text-align: center; padding: 10px;">
-            <strong>Failed to load Dota 2 stats</strong>
-          </div>
-        </div>
-      `;
-      rightCol[0].insertBefore(errorDiv, rightCol[0].children[1]);
     }
   } else {
     console.error("[DotaStats] Parent container \".profile_rightcol\" not found");
