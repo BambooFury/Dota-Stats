@@ -1,42 +1,9 @@
-# Python backend
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Node / JS tooling
 node_modules/
-npm-debug.log*
-yarn-error.log*
-pnpm-lock.yaml
 
-# IDE / OS
-.vscode/
-.idea/
-*.swp
-.DS_Store
-Thumbs.db
-
-# Build artifacts
 *.zip
-/dist/
-build/
-.cache/
+
 .millennium/
-*.log
 
-# Build scripts
-build_release.ps1
+.vscode/
 
-# Millennium / local-only stuff
-steamui/
-
-# Compiled webkit bundles
-webkit/*.js
-
-# Plugin Database (submodule)
 PluginDatabase/
-
-# Release archives
-dotastats-*.zip
-*-release.zip
