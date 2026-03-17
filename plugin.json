@@ -5,5 +5,5 @@
   "description": "View Dota 2 statistics on player profiles.",
   "version": "1.2.1",
   "backendType": "lua",
-  "include": ["static", "LICENSE"]
+  "include": ["LICENSE"]
 }
