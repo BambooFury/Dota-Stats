@@ -49,4 +49,4 @@ A [Millennium](https://steambrew.app/) plugin that displays Dota 2 player statis
 
 ## License
 
-MIT — see [LICENSE](LICENSE) for details.
+MIT —[LICENSE](LICENSE)
