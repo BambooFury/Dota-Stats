@@ -2,8 +2,10 @@ node_modules/
 
 *.zip
 
-.millennium/
-
 .vscode/
 
 PluginDatabase/
+
+config.ts
+
+webkit/token.ts
