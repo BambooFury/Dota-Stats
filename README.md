@@ -47,6 +47,6 @@ A [Millennium](https://steambrew.app/) plugin that displays Dota 2 player statis
    - **Windows:** `C:\Program Files (x86)\Steam\plugins\dotastats`
 3. Restart Steam and enable the plugin in Millennium settings
 
-## License
+This project is licensed under the MIT License - see the LICENSE[LICENSE] file for details.
 
-MIT —[LICENSE](LICENSE)
+MIT — This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
