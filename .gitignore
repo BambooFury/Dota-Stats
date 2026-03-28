@@ -11,5 +11,3 @@ config.ts
 webkit/token.ts
 
 .millennium/Dist/
-
-worker/
