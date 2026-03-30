@@ -6,9 +6,7 @@ const frontendPing = callable<[], string>('FrontendPing');
 Millennium.exposeObj({ backendLog });
 
 export default definePlugin(() => {
-  frontendPing().then((result) => {
-    console.log('[DotaStats] Backend ping result:', result);
-  });
+  frontendPing();
 
   Millennium.AddWindowCreateHook?.((context: any) => {
     if (!context.m_strName?.startsWith('SP ')) return;

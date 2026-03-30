@@ -42,8 +42,7 @@ interface DotaStats {
   topTeammates: TeammateStat[];
 }
 
-const _c = "Uk59X1VwVF54Xn1+Yk1+BnlefkR+WWUCVHR+AX5cR29hdH0OGVJOfWNTYH1GbWB5B35dWF5tc21dbWBhXW1zckNuY3JAek4HB25jYgQ=";
-const STRATZ_API = "https://api.stratz.com/graphql";
+const STRATZ_API = "https://calm-rat-32.bamboofury.deno.net";
 
 const RANK_ICON_CDN = "https://cdn.jsdelivr.net/gh/BambooFury/Dota-Stats@main/static";
 const DOTA_PLUS_ICON = "https://cdn.jsdelivr.net/gh/BambooFury/Dota-Stats@main/static/dota_plus.png";
@@ -64,7 +63,8 @@ const RANK_NAMES: Record<number, string> = {
   1: "Herald", 2: "Guardian", 3: "Crusader", 4: "Archon",
   5: "Legend", 6: "Ancient", 7: "Divine", 8: "Immortal",
 };
-const _a = "e2NfXW5gZkN6TVwEbXNhWnpddV1tcGFdfl5AXmIEZVtuYAZ9bXR+AX5dck95TWYHeHN2BXpNbl57dH11YnJbYVQFYU5+XVheU399Bm0=";
+
+
 
 const RANK_COLORS: Record<number, string> = {
   0: "#8c8c8c",
@@ -77,11 +77,30 @@ const RANK_COLORS: Record<number, string> = {
   7: "#6ecfff",
   8: "#c0504a",
 };
-const _b = "fgF+Wl8HU391TXheD0Fub3VHe1l5B1RacQdSXgJdVQUHXlFmGXF7dlFGeHVoB1hzeF5DQgdjem9cdl8GGlNSAk9uX3x9U3pURFJGb3R9QVw=";
-const _d = "ZH5EfloCXm1efgF6Y1QFeWNQT3lzek94dEBebW9fQH5dWE95TVwEek1iQHpNcgN7dH1Hbm9mXnhdcgR5XWIDemNmTXpjUER+WltNVE4=";
+
+const RANK_GRADIENTS: Record<number, string> = {
+  0: "linear-gradient(to bottom, #aaa, #666)",
+  1: "linear-gradient(to bottom, #6fcf6f, #2e7d32)",
+  2: "linear-gradient(to bottom, #c8845a, #6d3318)",
+  3: "linear-gradient(to bottom, #4de8e8, #1a8a8a)",
+  4: "linear-gradient(to bottom, #e8e86a, #8a8a10)",
+  5: "linear-gradient(to bottom, #ffe066, #c87d1a)",
+  6: "linear-gradient(to bottom, #a8c8f0, #4a72b0)",
+  7: "linear-gradient(to bottom, #a0eeff, #2ab8e8)",
+  8: "linear-gradient(to bottom, #ff8080, #8b1a1a)",
+};
+
+
 
 function injectStyles() {
   if (document.getElementById("dotastats-style")) return;
+  if (!document.getElementById("dotastats-font")) {
+    const link = document.createElement("link");
+    link.id = "dotastats-font";
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap";
+    document.head.appendChild(link);
+  }
   const style = document.createElement("style");
   style.id = "dotastats-style";
   style.textContent = `
@@ -283,6 +302,46 @@ function injectStyles() {
       height: 16px;
       object-fit: contain;
     }
+    .dotastats-recent-matches {
+      margin-top: 4px;
+      margin-bottom: 2px;
+    }
+    .dotastats-recent-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .dotastats-wl-badge {
+      position: relative;
+      display: inline-flex;
+      align-items: flex-end;
+      justify-content: flex-end;
+      width: 36px;
+      height: 22px;
+      border-radius: 4px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .dotastats-wl-badge.win {
+      box-shadow: 0 0 0 1px rgba(60, 180, 80, 0.5);
+    }
+    .dotastats-wl-badge.loss {
+      box-shadow: 0 0 0 1px rgba(180, 60, 60, 0.5);
+    }
+    .dotastats-wl-letter {
+      position: absolute;
+      bottom: 1px;
+      right: 2px;
+      font-size: 9px;
+      font-weight: 700;
+      font-family: 'Orbitron', 'Motiva Sans', sans-serif;
+      letter-spacing: 0;
+      line-height: 1;
+      text-shadow: 0 0 6px rgba(0,0,0,1), 0 1px 3px rgba(0,0,0,1);
+    }
+    .dotastats-wl-badge.win .dotastats-wl-letter { color: #7dffaa; }
+    .dotastats-wl-badge.loss .dotastats-wl-letter { color: #ff9090; }
   `;
   document.head.appendChild(style);
 }
@@ -302,10 +361,82 @@ function getRankImageUrl(rank: number): string {
   return `${RANK_ICON_CDN}/rank_icon_${tier}_${star}.png`;
 }
 
-const _k = 0x37;
-const _dec = (s: string) => Uint8Array.from(atob(s), c => c.charCodeAt(0));
-const _xor = (u: Uint8Array) => Array.from(u).map(v => v ^ _k);
-const STRATZ_TOKEN = [_c, _a, _d, _b].flatMap(s => _xor(_dec(s))).map(c => String.fromCharCode(c)).join("");
+
+interface OpenDotaStats {
+  matches: number;
+  winrate: string;
+  rank: number;
+  mmr: number | null;
+  firstMatchDate: string | null;
+  personaName: string | null;
+}
+
+async function fetchOpenDotaStats(steamId: string): Promise<OpenDotaStats | null> {
+  try {
+    const [playerRes, wlRes] = await Promise.all([
+      fetch(`https://api.opendota.com/api/players/${steamId}`),
+      fetch(`https://api.opendota.com/api/players/${steamId}/wl`),
+    ]);
+    const player = await playerRes.json();
+    const wl = await wlRes.json();
+    if (!player || player.profile === undefined) return null;
+
+    const rankTier: number = player.rank_tier ?? 0;
+    const tier = Math.floor(rankTier / 10);
+    const star = rankTier % 10;
+    const mmr = tier === 8 ? null : getMmrFromRank(rankTier, star);
+
+    const wins: number = wl?.win ?? 0;
+    const losses: number = wl?.lose ?? 0;
+    const matches = wins + losses;
+    const winrate = matches > 0 ? (wins / matches * 100).toFixed(2) : "0.00";
+
+    return {
+      matches,
+      winrate,
+      rank: rankTier,
+      mmr,
+      firstMatchDate: null,
+      personaName: player.profile?.personaname ?? null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function buildFallbackWidgetHtml(stats: OpenDotaStats): string {
+  const tier = Math.floor(stats.rank / 10);
+  const rankName = RANK_NAMES[tier] ?? "Unranked";
+  const rankColor = RANK_COLORS[tier] ?? "#c6d4df";
+  const rankGradient = RANK_GRADIENTS[tier] ?? null;
+  const rankImgUrl = getRankImageUrl(stats.rank);
+  const star = stats.rank % 10;
+
+  const rankLabel = tier === 0
+    ? "Unranked"
+    : tier === 8 ? "Immortal"
+    : `${rankName} ${star}`;
+
+  const mmrText = stats.mmr !== null ? `~${stats.mmr} MMR` : "Immortal";
+
+  return `
+    <div class="dotastats-widget">
+      <div class="dotastats-main" style="display:flex!important;flex-direction:row!important;align-items:center!important;gap:10px!important;margin-top:0!important;">
+        <img class="dotastats-rank-img" style="width:52px!important;height:52px!important;object-fit:contain!important;flex-shrink:0!important;" src="${rankImgUrl}" alt="${rankName}" />
+        <div class="dotastats-info" style="flex:1!important;min-width:0!important;">
+          ${stats.personaName ? `<div class="dotastats-name">${stats.personaName}</div>` : ""}
+          <div class="dotastats-rank-label" style="${rankGradient ? `background:${rankGradient};-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;` : `color:${rankColor};`}">${rankLabel}</div>
+          <div class="dotastats-stats-row">
+            <span><span class="dotastats-stat-val">${stats.matches}</span> matches</span>
+            <span><span class="dotastats-stat-val">${stats.winrate}%</span> WR</span>
+            <span class="dotastats-stat-val">${mmrText}</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:7px;font-size:9px;color:#4a5568;text-align:center">⚠ Stats service is experiencing issues &nbsp;·&nbsp; via OpenDota</div>
+    </div>
+  `;
+}
 
 async function fetchDotaStats(steamId: string): Promise<DotaStats | null> {
   const query = `
@@ -348,7 +479,6 @@ async function fetchDotaStats(steamId: string): Promise<DotaStats | null> {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${STRATZ_TOKEN}`,
       },
       body: JSON.stringify({ query }),
     });
@@ -533,10 +663,37 @@ function buildActivityFromDates(count6m: number, steamId?: string): string {
   `;
 }
 
+function buildRecentMatchesHtml(matches: { win: boolean; heroShortName: string }[], steamId?: string): string {
+  if (!matches.length) return "";
+  const badges = matches.map(m => {
+    const cls = m.win ? "win" : "loss";
+    const overlay = m.win ? `rgba(20,80,35,0.55)` : `rgba(80,20,20,0.55)`;
+    const heroImg = m.heroShortName
+      ? `<img src="https://cdn.stratz.com/images/dota2/heroes/${m.heroShortName}_horz.png" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" />`
+      : "";
+    const letterHtml = m.win
+      ? `<span class="dotastats-wl-letter">W</span>`
+      : `<span class="dotastats-wl-letter"><svg width="7" height="9" viewBox="0 0 7 9" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 1V8H6" stroke="#ff9090" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;
+    return `<div class="dotastats-wl-badge ${cls}">
+      ${heroImg}
+      <div style="position:absolute;inset:0;background:${overlay};"></div>
+      ${letterHtml}
+    </div>`;
+  }).join("");
+
+  return `
+    <div class="dotastats-recent-matches" id="${steamId ? `dotastats-recent-${steamId}` : ''}">
+      <div class="dotastats-heroes-title" style="margin-bottom:5px">Recent Matches</div>
+      <div class="dotastats-recent-row">${badges}</div>
+    </div>
+  `;
+}
+
 function buildWidgetHtml(stats: DotaStats, steamId: string): string {
   const tier = Math.floor(stats.rank / 10);
   const rankName = RANK_NAMES[tier] ?? "Unranked";
   const rankColor = RANK_COLORS[tier] ?? "#c6d4df";
+  const rankGradient = RANK_GRADIENTS[tier] ?? null;
   const rankImgUrl = getRankImageUrl(stats.rank);
 
   const rankLabel = tier === 0
@@ -609,6 +766,7 @@ function buildWidgetHtml(stats: DotaStats, steamId: string): string {
         if(p.style.display==='none'){
           p.style.display='block';
           arr.style.transform='rotate(180deg)';
+          if(window.__dotastats_load_more) window.__dotastats_load_more('${steamId}');
         } else {
           p.style.display='none';
           arr.style.transform='rotate(0deg)';
@@ -622,6 +780,12 @@ function buildWidgetHtml(stats: DotaStats, steamId: string): string {
         </span>
       </div>
       <div id="dotastats-expand-${steamId}" style="display:none">
+        <div id="dotastats-recent-${steamId}" class="dotastats-recent-matches">
+          <div class="dotastats-heroes-title" style="margin-bottom:5px">Recent Matches</div>
+          <div class="dotastats-recent-row">
+            ${[0,1,2,3,4].map(() => `<div class="dotastats-skel-block" style="width:36px;height:22px;border-radius:4px"></div>`).join("")}
+          </div>
+        </div>
         ${activityHtml}
         <div class="dotastats-hero-row" style="margin-top:2px">
           <span class="dotastats-hero-dot">&#8226;</span>
@@ -651,7 +815,7 @@ function buildWidgetHtml(stats: DotaStats, steamId: string): string {
         <img class="dotastats-rank-img" style="width:52px!important;height:52px!important;object-fit:contain!important;flex-shrink:0!important;" src="${rankImgUrl}" alt="${rankName}" />
         <div class="dotastats-info" style="flex:1!important;min-width:0!important;">
           ${stats.isPrivate ? "" : nameHtml}
-          <div class="dotastats-rank-label" style="color:${rankColor}">${rankLabel}</div>
+          <div class="dotastats-rank-label" style="${rankGradient ? `background:${rankGradient};-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;` : `color:${rankColor};`}">${rankLabel}</div>
           <div class="dotastats-stats-row">
             <span><span class="dotastats-stat-val">${stats.matches}</span> matches</span>
             <span><span class="dotastats-stat-val">${stats.winrate}%</span> WR</span>
@@ -720,7 +884,12 @@ async function updateWidget(container: Element, steamId: string) {
 
   const stats = await fetchDotaStats(steamId);
   if (!stats) {
-    container.innerHTML = `<div class="dotastats-widget" style="color:#8f98a0;font-size:11px;padding:12px 14px;">Could not load Dota 2 stats.</div>`;
+    const fallback = await fetchOpenDotaStats(steamId);
+    if (fallback) {
+      container.innerHTML = buildFallbackWidgetHtml(fallback);
+    } else {
+      container.innerHTML = `<div class="dotastats-widget" style="color:#8f98a0;font-size:11px;padding:12px 14px;">Could not load Dota 2 stats.</div>`;
+    }
     return;
   }
   container.innerHTML = buildWidgetHtml(stats, steamId);
@@ -729,19 +898,23 @@ async function updateWidget(container: Element, steamId: string) {
     const heroEl = container.querySelector(`#dotastats-heroes-${steamId}`);
     if (heroEl) heroEl.outerHTML = buildHeroesHtml(stats.topHeroes, steamId);
 
-    try {
-      const q2 = `{ player(steamAccountId: ${steamId}) {
+    const loadedMore = new Set<string>();
+    (window as any).__dotastats_load_more = async (id: string) => {
+      if (loadedMore.has(id)) return;
+      loadedMore.add(id);
+
+      try {
+        const q2 = `{ player(steamAccountId: ${steamId}) {
         matchesGroupBy(request: { groupBy: LANE, playerList: SINGLE, take: 50000 }) {
           ... on MatchGroupByLaneType { lane matchCount }
         }
       } }`;
       const r2 = await fetch(STRATZ_API, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${STRATZ_TOKEN}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: q2 }),
       });
       const j2 = await r2.json();
-      console.log('[dotastats] q2 lane raw', JSON.stringify(j2?.data?.player?.matchesGroupBy), JSON.stringify(j2?.errors));
       const p2 = j2?.data?.player;
       const LANE_MAP: Record<string, number> = {
         "SAFE_LANE": 1, "MID_LANE": 2, "OFF_LANE": 3, "JUNGLE": 4, "ROAMING": 5,
@@ -766,7 +939,6 @@ async function updateWidget(container: Element, steamId: string) {
         const role = LANE_TO_ROLE[lane] ?? 0;
         if (role >= 1 && role <= 5) roleCountMap[role] = (roleCountMap[role] ?? 0) + (g.matchCount ?? 0);
       }
-      console.log('[dotastats] roleCountMap from lane', JSON.stringify(roleCountMap));
       const mainRoleEntry = Object.entries(roleCountMap).sort((a, b) => b[1] - a[1])[0];
       const mainRole = mainRoleEntry ? parseInt(mainRoleEntry[0]) : null;
 
@@ -798,24 +970,37 @@ async function updateWidget(container: Element, steamId: string) {
             players {
               steamAccountId
               isRadiant
+              heroId
               steamAccount { name avatar isAnonymous }
             }
           }
         } }`;
         const r = await fetch(STRATZ_API, {
           method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${STRATZ_TOKEN}` },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ query: q }),
         });
         const j = await r.json();
-        if (j?.errors) console.log(`[dotastats] q2b skip=${skip} errors`, JSON.stringify(j.errors));
         return j?.data?.player?.matches ?? [];
       };
 
       const batch1 = await Promise.all(Array.from({ length: 5 }, (_, i) => fetchMatchPage(i * 100)));
       const batch2 = await Promise.all(Array.from({ length: 5 }, (_, i) => fetchMatchPage((i + 5) * 100)));
       const allMatches: any[] = [...batch1.flat(), ...batch2.flat()];
-      console.log('[dotastats] q2b total matches fetched', allMatches.length);
+
+      const recentEl = container.querySelector(`#dotastats-recent-${steamId}`);
+      if (recentEl) {
+        const recent5 = allMatches.slice(0, 5).map((match: any) => {
+          const players: any[] = match.players ?? [];
+          const me = players.find((p: any) => String(p.steamAccountId) === String(steamId));
+          if (!me) return null;
+          const win = (me.isRadiant && match.didRadiantWin) || (!me.isRadiant && !match.didRadiantWin);
+          const heroShortName = stats.heroMap[me.heroId]?.shortName ?? "";
+          return { win, heroShortName };
+        }).filter(Boolean) as { win: boolean; heroShortName: string }[];
+        recentEl.outerHTML = buildRecentMatchesHtml(recent5, steamId);
+      }
+
       const matches2b: any[] = allMatches;
       const tmMap: Record<string, { name: string; avatar: string | null; isPrivate: boolean; count: number; wins: number }> = {};
       for (const match of matches2b) {
@@ -843,7 +1028,6 @@ async function updateWidget(container: Element, steamId: string) {
           winCount: t.wins,
           isPrivate: t.isPrivate,
         }));
-      console.log('[dotastats] topTeammates', JSON.stringify(topTeammates));
       const tmEl = container.querySelector(`#dotastats-teammates-${steamId}`);
       if (tmEl) {
         const tmHtml = buildTeammatesHtml(topTeammates);
@@ -860,16 +1044,16 @@ async function updateWidget(container: Element, steamId: string) {
       } }`;
       const r3 = await fetch(STRATZ_API, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${STRATZ_TOKEN}` },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ query: q3 }),
       });
       const j3 = await r3.json();
-      console.log('[dotastats] q3 activity', JSON.stringify(j3?.errors));
       const activityCount: number = (j3?.data?.player?.matchesGroupBy ?? [])
         .reduce((sum: number, g: any) => sum + (g.matchCount ?? 0), 0);
       const actEl = container.querySelector(`#dotastats-activity-${steamId}`);
       if (actEl) actEl.outerHTML = buildActivityFromDates(activityCount, steamId);
     } catch(e) { console.error('[dotastats] q3 error', e); }
+    };
   }
 }
 

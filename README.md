@@ -8,8 +8,8 @@ A [Millennium](https://steambrew.app/) plugin that displays Dota 2 player statis
 
 <table>
   <tr>
-    <td><img src="example.png" alt="Dota 2 Stats Preview" width="420" /></td>
-    <td valign="top"><img src="stats.png" alt="Dota 2 Stats Expanded" width="220" /></td>
+    <td><img src="example.png" alt="Dota 2 Stats Preview" width="680" /></td>
+    <td valign="top"><img src="example-stats.png" alt="Dota 2 Stats Expanded" width="230" /></td>
   </tr>
 </table>
 
@@ -32,12 +32,13 @@ A [Millennium](https://steambrew.app/) plugin that displays Dota 2 player statis
 
 ## Installation
 
-### Method 1: Millennium Plugin Store (Recommended)
+### Method 1: Millennium Plugin Installer (Recommended)
 
-1. Open Steam with [Millennium](https://steambrew.app/) installed
-2. Go to **Steam → Millennium → Store**
-3. Search for **DotaStats** and click **Install**
-4. Restart Steam
+1. Open Steam with Millennium installed
+2. Go to **Steam** → **Millennium** → **Plugins**
+3. Click **"Install a plugin"**
+4. Enter the plugin ID and click **"Install"**
+5. Restart Steam when prompte
 
 ### Method 2: Manual Installation
 
@@ -45,7 +46,7 @@ A [Millennium](https://steambrew.app/) plugin that displays Dota 2 player statis
 2. Extract to your Steam plugins folder:
    - **Windows:** `C:\Program Files (x86)\Steam\plugins\dotastats`
 3. Restart Steam and enable the plugin in Millennium settings
-
+   
 ## License
 
-MIT — see [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
