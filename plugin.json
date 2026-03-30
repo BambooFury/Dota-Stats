@@ -3,7 +3,7 @@
   "name": "dotastats",
   "common_name": "Dota 2 Stats",
   "description": "View Dota 2 statistics on player profiles.",
-  "version": "1.2.1",
+  "version": "2.0.0",
   "backendType": "lua",
   "include": ["LICENSE"]
 }
