@@ -217,6 +217,10 @@ function injectStyles() {
       font-weight: 600;
       color: #e8eaed;
       margin-bottom: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 160px;
     }
     .dotastats-rank-label {
       font-size: 11px;
@@ -616,7 +620,9 @@ function buildTeammatesHtml(teammates: TeammateStat[]): string {
       <div class="dotastats-hero-row">
         <span class="dotastats-hero-dot">&#8226;</span>
         <a href="${profileUrl}" style="display:flex;align-items:center;flex-shrink:0;cursor:pointer"><img src="${avatarUrl}" style="width:22px;height:22px;border-radius:3px;object-fit:cover;" alt="${t.name}" /></a>
-        <a href="${profileUrl}" class="dotastats-hero-name" style="color:#c6d4df;text-decoration:none;cursor:pointer;display:flex;align-items:center;gap:3px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#c6d4df'">${t.name}${privateBadgeInline}</a>
+        <div style="flex:1;display:flex;align-items:center;gap:3px;overflow:hidden;min-width:0;">
+          <a href="${profileUrl}" style="color:#c6d4df;text-decoration:none;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#c6d4df'">${t.name}</a>${privateBadgeInline ? `<span style="flex-shrink:0">${privateBadgeInline}</span>` : ""}
+        </div>
         <div class="dotastats-hero-stats">
           <span style="color:${wrColor}">${wr}%</span>
           <span style="font-size:10px">${t.matchCount} game</span>
