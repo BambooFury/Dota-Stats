@@ -1,0 +1,18 @@
+<div class="dotastats-widget">
+  {{heroesHtml}}
+  {{expandHtml}}
+  {{privateBadgeHtml}}
+  <div class="dotastats-main dotastats-main--primary">
+    <img class="dotastats-rank-img" src="{{rankImgUrl}}" alt="{{rankName}}" />
+    <div class="dotastats-info">
+      {{nameHtml}}
+      <div class="dotastats-rank-label {{rankLabelClass}}">{{rankLabel}}</div>
+      <div class="dotastats-stats-row">
+        <span><span class="dotastats-stat-val">{{matches}}</span> matches</span>
+        <span><span class="dotastats-stat-val">{{winrate}}</span> WR</span>
+        <span class="dotastats-stat-val">{{mmrText}}</span>
+      </div>
+    </div>
+  </div>
+  {{footerHtml}}
+</div>

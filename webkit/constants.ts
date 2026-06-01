@@ -19,27 +19,3 @@ export const RANK_NAMES: Record<number, string> = {
   1: "Herald", 2: "Guardian", 3: "Crusader", 4: "Archon",
   5: "Legend", 6: "Ancient", 7: "Divine", 8: "Immortal",
 };
-
-export const RANK_COLORS: Record<number, string> = {
-  0: "#8c8c8c",
-  1: "#4caf50",
-  2: "#a0522d",
-  3: "#2abfbf",
-  4: "#c8c84a",
-  5: "#f0c040",
-  6: "#7b9fd4",
-  7: "#6ecfff",
-  8: "#c0504a",
-};
-
-export const RANK_GRADIENTS: Record<number, string> = {
-  0: "linear-gradient(to bottom, #aaa, #666)",
-  1: "linear-gradient(to bottom, #6fcf6f, #2e7d32)",
-  2: "linear-gradient(to bottom, #c8845a, #6d3318)",
-  3: "linear-gradient(to bottom, #4de8e8, #1a8a8a)",
-  4: "linear-gradient(to bottom, #e8e86a, #8a8a10)",
-  5: "linear-gradient(to bottom, #ffe066, #c87d1a)",
-  6: "linear-gradient(to bottom, #a8c8f0, #4a72b0)",
-  7: "linear-gradient(to bottom, #a0eeff, #2ab8e8)",
-  8: "linear-gradient(to bottom, #ff8080, #8b1a1a)",
-};
